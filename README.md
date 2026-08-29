@@ -5,7 +5,16 @@
 <h1 align="center">Agent Mocker</h1>
 
 <p align="center">
-  <strong>The open-source AI mock platform.</strong><br />
+  <strong>还在为 Agent 调试烧 Token 发愁？</strong><br />
+  还在等待模型“碰巧”调用 Tool，或苦于无法复现 429、超时和异常分支？<br />
+  <strong>把不可控的模型响应，变成可编排、可复现、可回放的测试流程。</strong>
+</p>
+
+<p align="center">
+  <strong>零 Token · 稳定复现 · 全程可观测 · 随时 Replay</strong>
+</p>
+
+<p align="center">
 面向 Agent 开发的可控 AI Runtime Mock Server。它兼容 OpenAI Chat Completions API，但不调用真实 LLM(可选择转发到真实LLM)，而是通过规则、场景、人工操作和 Tool Mock 决定响应。Agent Mocker 适合用来调试和回归 Agent 的业务流程：零 Token、可重复、可观测，并且可以稳定复现 Tool Call、错误、超时、延迟和人工介入等分支。
 </p>
 
