@@ -47,12 +47,32 @@
 
 ## 快速开始
 
-### 环境要求
+### 使用 Docker 快速启动
+
+```bash
+docker run -d \
+  --name agent-mocker \
+  --restart unless-stopped \
+  -p 3000:3000 \
+  -v agent-mocker-data:/app/data \
+  ikiler/agent-mocker:latest
+```
+
+启动后访问：
+
+- Web UI：<http://localhost:3000>
+- Mock API：<http://localhost:3000/v1>
+
+SQLite 数据保存在 Docker 卷 `agent-mocker-data` 中，删除或重建容器不会丢失数据。需要运行指定版本时，将 `latest` 替换为对应版本号，例如 `1.2.3`。
+
+### 使用源码启动
+
+#### 环境要求
 
 - Node.js `>= 22`
 - pnpm `>= 10`
 
-### 安装与启动
+#### 安装与启动
 
 ```bash
 git clone https://github.com/<org>/<repo>.git
@@ -240,7 +260,7 @@ MOCK_PORT=3100 MOCK_DB_PATH=/tmp/agent-mock.db pnpm dev:server
 - [x] Rule / Scenario 响应编排
 - [x] Tool Mock、错误和延迟模拟
 - [x] Session Replay
-- [ ] Docker 镜像
+- [x] Docker 镜像
 - [ ] 自动化测试报告
 - [ ] 更多模型协议支持
 
