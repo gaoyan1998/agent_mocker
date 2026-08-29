@@ -1,0 +1,56 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="utf-8" />
+    <meta http-equiv="Content-Security-Policy" content="default-src 'none'; style-src 'unsafe-inline'; script-src 'unsafe-inline'" />
+    <title>Agent Mocker</title>
+    <style>
+      :root {
+        color-scheme: dark;
+        --bg: #0f1115;
+        --fg: #e6e8ee;
+        --muted: #8b93a7;
+        --accent: #4f7cff;
+      }
+      * { box-sizing: border-box; }
+      html, body { height: 100%; margin: 0; }
+      body {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        gap: 20px;
+        background: var(--bg);
+        color: var(--fg);
+        font: 14px/1.6 -apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC',
+          'Hiragino Sans GB', 'Microsoft YaHei', sans-serif;
+        user-select: none;
+        -webkit-user-select: none;
+      }
+      .spinner {
+        width: 32px;
+        height: 32px;
+        border: 3px solid rgba(255, 255, 255, 0.12);
+        border-top-color: var(--accent);
+        border-radius: 50%;
+        animation: spin 0.9s linear infinite;
+      }
+      @keyframes spin { to { transform: rotate(360deg); } }
+      @media (prefers-reduced-motion: reduce) {
+        .spinner { animation-duration: 3s; }
+      }
+      h1 { margin: 0; font-size: 15px; font-weight: 600; letter-spacing: 0.01em; }
+      p { margin: 0; color: var(--muted); font-size: 13px; }
+    </style>
+  </head>
+  <body>
+    <div class="spinner"></div>
+    <h1>Agent Mocker</h1>
+    <p id="text">正在启动 Mock 服务…</p>
+    <script>
+      // 文案由主进程通过 loadFile 的 query 传进来，跟随系统语言。
+      const text = new URLSearchParams(location.search).get('text');
+      if (text) document.getElementById('text').textContent = text;
+    </script>
+  </body>
+</html>

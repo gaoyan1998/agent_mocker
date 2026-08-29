@@ -1,0 +1,32 @@
+{
+  "name": "@agent-mock/desktop",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Agent Mocker desktop shell (Electron)",
+  "license": "Apache-2.0",
+  "main": "dist/main/index.cjs",
+  "scripts": {
+    "build": "node scripts/build.mjs",
+    "dev": "node scripts/build.mjs --dev",
+    "icon": "node scripts/make-icon.mjs",
+    "smoke": "node scripts/smoke.mjs",
+    "typecheck": "tsc -p tsconfig.json --noEmit",
+    "rebuild": "electron-builder install-app-deps",
+    "pack": "node scripts/build.mjs && electron-builder --dir",
+    "dist": "node scripts/build.mjs && electron-builder",
+    "dist:linux": "node scripts/build.mjs && electron-builder --linux",
+    "dist:mac": "node scripts/build.mjs && electron-builder --mac",
+    "dist:win": "node scripts/build.mjs && electron-builder --win"
+  },
+  "dependencies": {
+    "better-sqlite3": "^13.0.3"
+  },
+  "devDependencies": {
+    "@types/better-sqlite3": "^9.6.0",
+    "@types/node": "^26.2.0",
+    "electron": "^44.0.0",
+    "electron-builder": "^26.15.3",
+    "esbuild": "^0.28.2",
+    "typescript": "^5.9.3"
+  }
+}

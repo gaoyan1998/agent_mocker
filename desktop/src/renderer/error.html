@@ -1,0 +1,63 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="utf-8" />
+    <meta http-equiv="Content-Security-Policy" content="default-src 'none'; style-src 'unsafe-inline'; script-src 'unsafe-inline'" />
+    <title>Agent Mocker</title>
+    <style>
+      :root {
+        color-scheme: dark;
+        --bg: #0f1115;
+        --fg: #e6e8ee;
+        --muted: #8b93a7;
+        --danger: #ff6b6b;
+        --panel: #171a21;
+      }
+      * { box-sizing: border-box; }
+      html, body { height: 100%; margin: 0; }
+      body {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        gap: 16px;
+        padding: 40px;
+        background: var(--bg);
+        color: var(--fg);
+        font: 14px/1.6 -apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC',
+          'Hiragino Sans GB', 'Microsoft YaHei', sans-serif;
+      }
+      h1 { margin: 0; font-size: 16px; font-weight: 600; color: var(--danger); }
+      pre {
+        max-width: 640px;
+        max-height: 40vh;
+        margin: 0;
+        padding: 14px 16px;
+        overflow: auto;
+        border-radius: 8px;
+        background: var(--panel);
+        color: var(--fg);
+        font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+        font-size: 12.5px;
+        white-space: pre-wrap;
+        word-break: break-word;
+        user-select: text;
+        -webkit-user-select: text;
+      }
+      p { margin: 0; max-width: 640px; color: var(--muted); font-size: 13px; text-align: center; }
+    </style>
+  </head>
+  <body>
+    <h1 id="title">Agent Mocker 启动失败</h1>
+    <pre id="message"></pre>
+    <p id="hint"></p>
+    <script>
+      // 主进程通过 loadFile 的 query 传入具体错误，避免把字符串拼进 URL 时被解释成 HTML。
+      const params = new URLSearchParams(location.search);
+      for (const id of ['title', 'message', 'hint']) {
+        const value = params.get(id);
+        if (value) document.getElementById(id).textContent = value;
+      }
+    </script>
+  </body>
+</html>

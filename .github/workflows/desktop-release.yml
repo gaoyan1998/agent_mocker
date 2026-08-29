@@ -1,0 +1,193 @@
+name: Build and release desktop app
+
+# 手动触发：Actions → Build and release desktop app → Run workflow。
+on:
+  workflow_dispatch:
+    inputs:
+      version:
+        description: '版本号，如 0.2.0。留空则沿用 desktop/package.json 里的值'
+        required: false
+        type: string
+      draft:
+        description: '先创建草稿 Release（确认产物后再手动发布）'
+        required: false
+        type: boolean
+        default: true
+      prerelease:
+        description: '标记为预发布版本'
+        required: false
+        type: boolean
+        default: false
+
+permissions:
+  contents: write
+
+concurrency:
+  group: desktop-release-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  build:
+    name: Build ${{ matrix.name }}
+    runs-on: ${{ matrix.os }}
+    # 一个平台挂掉不影响其它平台继续构建，可以在一次运行里看全所有报错。
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          # better-sqlite3 用的是 N-API 预编译产物（prebuilds/ 下各平台各一份），
+          # 打包过程不需要现场编译原生模块，所以每个 runner 可以同时出 x64 和 arm64。
+          - name: linux
+            os: ubuntu-22.04
+            target: --linux --x64 --arm64
+          - name: windows
+            os: windows-latest
+            target: --win --x64 --arm64
+          - name: macos
+            os: macos-latest
+            target: --mac --x64 --arm64
+
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Set up pnpm
+        uses: pnpm/action-setup@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+          cache-dependency-path: pnpm-lock.yaml
+
+      # AppImage / deb 打包依赖 bsdtar，ubuntu runner 默认没装。
+      - name: Install Linux packaging tools
+        if: startsWith(matrix.os, 'ubuntu')
+        run: sudo apt-get update && sudo apt-get install --no-install-recommends -y libarchive-tools
+
+      # desktop/ 的构建脚本会调用 pnpm --filter @agent-mock/web build，
+      # 所以根工作区的依赖必须先装好。
+      - name: Install workspace dependencies
+        run: pnpm install --frozen-lockfile
+
+      # desktop/ 是独立的 pnpm 根目录（见 desktop/pnpm-workspace.yaml），
+      # Electron 这类大依赖不进根工作区。
+      - name: Install desktop dependencies
+        working-directory: desktop
+        run: pnpm install
+
+      - name: Apply release version
+        if: inputs.version != ''
+        working-directory: desktop
+        run: node scripts/set-version.mjs "${{ inputs.version }}"
+
+      - name: Generate application icon
+        working-directory: desktop
+        run: node scripts/make-icon.mjs
+
+      - name: Type-check desktop sources
+        working-directory: desktop
+        run: pnpm typecheck
+
+      - name: Build renderer and server bundles
+        working-directory: desktop
+        run: pnpm build
+
+      # 在 Electron 的运行时里真正拉起一次服务端：原生模块能加载、SQLite 能写、
+      # Mock API 有响应。放在打包之前，坏掉的产物就不会被发出去。
+      - name: Smoke-test the server bundle
+        working-directory: desktop
+        run: node scripts/smoke.mjs
+
+      # --publish never：产物只上传为 artifact，Release 统一由下面的 release job 创建。
+      - name: Package with electron-builder
+        working-directory: desktop
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: pnpm exec electron-builder ${{ matrix.target }} --publish never
+
+      - name: Upload installers
+        uses: actions/upload-artifact@v4
+        with:
+          name: desktop-${{ matrix.name }}
+          if-no-files-found: error
+          retention-days: 14
+          path: |
+            desktop/release/*.AppImage
+            desktop/release/*.deb
+            desktop/release/*.tar.gz
+            desktop/release/*.exe
+            desktop/release/*.zip
+            desktop/release/*.dmg
+
+  release:
+    name: Publish release
+    needs: build
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Download all installers
+        uses: actions/download-artifact@v4
+        with:
+          path: artifacts
+          pattern: desktop-*
+          merge-multiple: true
+
+      - name: Resolve version and tag
+        id: meta
+        run: |
+          version="${{ inputs.version }}"
+          if [ -z "$version" ]; then
+            version=$(node -p "require('./desktop/package.json').version")
+          fi
+          echo "version=$version" >> "$GITHUB_OUTPUT"
+          echo "tag=desktop-v$version" >> "$GITHUB_OUTPUT"
+
+      - name: List artifacts
+        run: ls -lh artifacts
+
+      - name: Create GitHub release
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          TAG: ${{ steps.meta.outputs.tag }}
+          VERSION: ${{ steps.meta.outputs.version }}
+        run: |
+          set -euo pipefail
+
+          notes=$(cat <<'EOF'
+          Agent Mocker 桌面版，内置 Mock 服务，开箱即用，无需 Node 环境。
+
+          ### 下载哪个
+
+          安装包按 `agent-mocker-<版本>-<平台>-<架构>.<格式>` 命名，挑对应自己系统的那个：
+
+          | 系统 | 格式 | 架构 |
+          | --- | --- | --- |
+          | Windows | `.exe`（安装版）或 `.zip`（免安装） | `x64` / `arm64` |
+          | macOS | `.dmg` | Apple Silicon 选 `arm64`，Intel 选 `x64` |
+          | Linux | `.AppImage`（免安装）、`.deb` 或 `.tar.gz` | `x64` / `arm64` |
+
+          ### 首次启动
+
+          安装包未做代码签名：
+
+          - macOS 会提示「无法验证开发者」，在「访达」里右键图标选「打开」即可。
+          - Windows SmartScreen 会拦一次，点「更多信息 → 仍要运行」。
+
+          启动后 Mock API 默认在 `http://127.0.0.1:3000/v1`，把 Agent 的 `base_url` 指过去即可。
+          端口被占用时会自动顺延，实际地址显示在窗口标题栏，也可以用菜单「文件 → 复制 Mock API 地址」。
+          EOF
+          )
+
+          flags=()
+          if [ "${{ inputs.draft }}" = "true" ]; then flags+=(--draft); fi
+          if [ "${{ inputs.prerelease }}" = "true" ]; then flags+=(--prerelease); fi
+
+          gh release create "$TAG" artifacts/* \
+            --title "Agent Mocker Desktop $VERSION" \
+            --notes "$notes" \
+            "${flags[@]}"
