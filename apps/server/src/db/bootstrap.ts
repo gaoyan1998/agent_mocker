@@ -1,4 +1,4 @@
-import type Database from 'better-sqlite3';
+import type { DatabaseSync } from 'node:sqlite';
 
 /**
  * 建表 SQL。用 `IF NOT EXISTS` 直接在启动时执行，省掉 migration 工具链 ——
@@ -155,10 +155,11 @@ const STATEMENTS = [
   `CREATE INDEX IF NOT EXISTS api_logs_session_idx ON api_logs (session_id)`,
 ];
 
-export function bootstrapSchema(sqlite: Database.Database): void {
-  sqlite.pragma('journal_mode = WAL');
-  sqlite.pragma('foreign_keys = ON');
-  sqlite.pragma('busy_timeout = 5000');
+export function bootstrapSchema(sqlite: DatabaseSync): void {
+  // node:sqlite 默认就开了外键约束，这里显式写一遍，语义与 better-sqlite3 时代保持一致。
+  sqlite.exec('PRAGMA journal_mode = WAL');
+  sqlite.exec('PRAGMA foreign_keys = ON');
+  sqlite.exec('PRAGMA busy_timeout = 5000');
   for (const statement of STATEMENTS) {
     sqlite.exec(statement);
   }

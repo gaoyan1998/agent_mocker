@@ -5,8 +5,6 @@
 //   dist/web/                apps/web 的构建产物
 //   dist/renderer/           启动与错误提示页
 //
-// 只有 better-sqlite3 保持 external —— 原生模块必须由 electron-builder
-// 按 Electron 的 ABI 重新编译，不能被 bundle。
 import { spawnSync } from 'node:child_process';
 import fs from 'node:fs';
 import path from 'node:path';
@@ -31,7 +29,7 @@ const shared = {
   bundle: true,
   platform: 'node',
   format: 'cjs',
-  target: 'node20',
+  target: 'node24',
   sourcemap: isDev ? 'inline' : false,
   minify: !isDev,
   // 默认会把中文转义成 \uXXXX，产物既变大又不好 grep。
@@ -67,7 +65,7 @@ async function bundleServer() {
     ...shared,
     entryPoints: [path.join(desktopDir, 'src', 'server', 'entry.ts')],
     outfile: path.join(distDir, 'server', 'index.cjs'),
-    external: ['better-sqlite3', 'electron'],
+    external: ['electron'],
     // 服务端源码里的 import.meta.url 会被换成上面 banner 里的常量。
     define: { 'import.meta.url': '__import_meta_url' },
     banner: { js: IMPORT_META_URL_SHIM },

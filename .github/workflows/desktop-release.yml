@@ -35,8 +35,6 @@ jobs:
       fail-fast: false
       matrix:
         include:
-          # better-sqlite3 用的是 N-API 预编译产物（prebuilds/ 下各平台各一份），
-          # 打包过程不需要现场编译原生模块，所以每个 runner 可以同时出 x64 和 arm64。
           - name: linux
             os: ubuntu-22.04
             target: --linux --x64 --arm64
@@ -57,7 +55,7 @@ jobs:
       - name: Set up Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: 22
+          node-version: 24
           cache: pnpm
           cache-dependency-path: pnpm-lock.yaml
 
@@ -94,7 +92,7 @@ jobs:
         working-directory: desktop
         run: pnpm build
 
-      # 在 Electron 的运行时里真正拉起一次服务端：原生模块能加载、SQLite 能写、
+      # 在 Electron 的运行时里真正拉起一次服务端：node:sqlite 能用、SQLite 能写、
       # Mock API 有响应。放在打包之前，坏掉的产物就不会被发出去。
       - name: Smoke-test the server bundle
         working-directory: desktop

@@ -4,8 +4,7 @@
 # 让 pnpm 在向上查找工作区时停在这里，从而可以在本目录单独执行 `pnpm install`。
 packages: []
 
-# 这些包需要执行安装脚本（编译原生模块 / 下载二进制）。
+# 这些包需要执行安装脚本（下载二进制）。
 onlyBuiltDependencies:
-  - better-sqlite3
   - electron
   - esbuild

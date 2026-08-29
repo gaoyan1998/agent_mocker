@@ -74,6 +74,25 @@ const messages = [{ role: 'user', content: '帮我查询订单 123456' }];
 
 log('会话 ID', SESSION_ID);
 
+// 会话必须显式绑定规则（ruleIds）才会参与规则匹配。找到示例项目，把启用规则
+// 全部绑到本次冒烟会话上；管理 API 的接口详见 apps/server/src/api。
+const projects = (await (await fetch(`${SERVER_URL}/api/projects`)).json()).items;
+const project = projects.find((item) => item.apiKey === API_KEY) ?? projects[0];
+if (project) {
+  const rules = (await (await fetch(`${SERVER_URL}/api/projects/${project.id}/rules`)).json())
+    .items.filter((rule) => rule.enabled);
+  const created = await fetch(`${SERVER_URL}/api/projects/${project.id}/sessions`, {
+    method: 'POST',
+    headers: { 'content-type': 'application/json' },
+    body: JSON.stringify({ name: '冒烟测试', externalId: SESSION_ID, ruleIds: rules.map((rule) => rule.id) }),
+  });
+  if (!created.ok) {
+    const detail = await created.text();
+    throw new Error(`绑定规则的会话创建失败：HTTP ${created.status} ${detail}`);
+  }
+  log('已绑定启用规则', rules.map((rule) => rule.name));
+}
+
 // 第一轮：示例规则会返回 Think + get_order 的 tool call
 const first = await chat({ model: 'gpt-4o', messages });
 log('第 1 轮响应', first.choices[0].message);

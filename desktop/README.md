@@ -12,7 +12,7 @@ Electron 主进程
 └── BrowserWindow 加载 http://127.0.0.1:3000/      即 apps/web 的构建产物
 ```
 
-服务端**直接跑在主进程里**，不额外 fork 子进程：少一层进程管理，原生模块的加载路径也
+服务端**直接跑在主进程里**，不额外 fork 子进程：少一层进程管理，模块加载路径也
 交给 Electron 自己解析。Web UI 通过 HTTP 访问服务端和 `pnpm start` 时的行为完全一致
 （`apps/web/src/api/client.ts` 里 `baseURL` 就是相对路径 `/api`）。
 
@@ -26,14 +26,10 @@ Electron 主进程
 | `dist/web/` | `apps/web` 的构建产物，由 Fastify 静态托管 |
 | `dist/renderer/` | 启动中 / 启动失败的提示页 |
 
-只有 `better-sqlite3` 保持外部依赖 —— 原生模块不能被 bundle。它和 `dist/web/` 一起走
-`asarUnpack`：`.node` 无法从 asar 内 `dlopen`，而 `@fastify/static` 会对静态根目录做
-`realpath` 校验。
-
-`better-sqlite3` v13 用的是 **N-API 预编译产物**（`prebuilds/` 下 linux / darwin / win32 ×
-x64 / arm64 各一份，文件名里没有 ABI 版本号），跨 Node 和 Electron 版本都能直接加载。
-带来两个好处：本地开发不需要为 Electron 重编原生模块；打包时也不需要现场编译，
-所以一台 runner 可以同时产出 x64 和 arm64 的安装包。
+SQLite 使用 Node 24 内置的 `node:sqlite`（自定义 Drizzle 驱动见
+`apps/server/src/db/node-sqlite.ts`），整个产物是纯 JS，没有任何原生模块；构建时也不
+需要现场编译，所以一台 runner 可以同时产出 x64 和 arm64 的安装包。`dist/web/` 仍走
+`asarUnpack`：`@fastify/static` 会对静态根目录做 `realpath` 校验。
 
 ## 数据存在哪
 
@@ -98,12 +94,11 @@ node scripts/build.mjs --skip-web
 改完 `apps/server` 或 `apps/web` 的源码后需要重新 `pnpm build` —— 桌面版加载的是构建产物，
 不是源码。
 
-`pnpm smoke` 会在 Electron 的运行时里真正拉起一次服务端，检查原生模块能否加载、SQLite
+`pnpm smoke` 会在 Electron 的运行时里真正拉起一次服务端，检查 node:sqlite 能否使用、SQLite
 能否写入、Mock API 和 Web UI 有没有正常响应。CI 在打包前会先跑它。
 
-> 因为 `better-sqlite3` 是 N-API 预编译产物，本地开发**不需要**为 Electron 重编原生模块。
-> 万一之后引入了传统 ABI 的原生依赖，用 `pnpm rebuild`（即 `electron-builder install-app-deps`）
-> 按 Electron 的 ABI 重编一次。
+> 注意：桌面版要求本机 Node ≥ 24（`node:sqlite` 的要求）；Electron 内嵌自己的 Node
+> 运行时，应用运行不依赖系统 Node。
 
 ## 本地打包
 
@@ -114,9 +109,8 @@ pnpm dist:mac      # dmg + zip
 pnpm pack          # 只解包成目录，用来快速验证打包结果
 ```
 
-产物在 `desktop/release/`。因为 `better-sqlite3` 各平台的预编译产物都随包发布，
-在一台机器上交叉打出另一个架构的包是可行的；但 `.dmg` 的制作和 macOS 签名仍然需要 macOS，
-正式产物请走下面的 CI。
+产物在 `desktop/release/`。产物是纯 JS（没有原生模块），在一台机器上交叉打出另一个
+架构的包是可行的；但 `.dmg` 的制作和 macOS 签名仍然需要 macOS，正式产物请走下面的 CI。
 
 ## 发布（GitHub Actions）
 

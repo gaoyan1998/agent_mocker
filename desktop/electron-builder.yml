@@ -6,26 +6,16 @@ directories:
   output: release
   buildResources: build
 
-# dist/ 里已经是 esbuild 打好的产物；node_modules 只剩 better-sqlite3 这一个
-# 生产依赖（其余 JS 依赖都被 bundle 进去了），electron-builder 会自动带上。
+# dist/ 里已经是 esbuild 打好的产物；SQLite 用 Node 24 内置的 node:sqlite，
+# 整个应用没有任何生产依赖，也不存在需要重编的原生模块。
 files:
   - dist/**/*
   - package.json
-  # better-sqlite3 加载的是 prebuilds/ 里的 N-API 预编译产物，
-  # 供 node-gyp 现场编译用的 C++ 源码（约 25MB）不需要进安装包。
-  # node_modules 由单独的收集器处理，排除规则要写成 **/node_modules/… 的形式才生效。
-  - '!**/node_modules/better-sqlite3/deps/**'
-  - '!**/node_modules/better-sqlite3/src/**'
 
-# 原生模块和被 @fastify/static 读取的静态目录都不能待在 asar 里：
-# .node 无法从 asar 内 dlopen，而 @fastify/static 会对 root 做 realpath 校验。
+# 被 @fastify/static 读取的静态目录不能待在 asar 里：
+# @fastify/static 会对 root 做 realpath 校验。
 asarUnpack:
   - dist/web/**/*
-  - node_modules/better-sqlite3/**/*
-
-# 让 electron-builder 用 Electron 的 ABI 重新编译 better-sqlite3。
-npmRebuild: true
-buildDependenciesFromSource: false
 
 artifactName: agent-mocker-${version}-${os}-${arch}.${ext}
 

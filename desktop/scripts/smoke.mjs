@@ -1,5 +1,5 @@
 // 冒烟测试：在 Electron 的 Node 运行时里加载打包后的服务端 bundle，
-// 验证 better-sqlite3（N-API 预编译产物）、Fastify 以及静态托管都正常。
+// 验证 node:sqlite（Node 内置模块）、Fastify 以及静态托管都正常。
 // 用法：node scripts/smoke.mjs —— 会自动用 Electron 重新拉起自己。
 import { spawnSync } from 'node:child_process';
 import fs from 'node:fs';
@@ -62,9 +62,20 @@ check('GET / 返回 Web UI', index.ok && html.includes('<div id="root"'), `${ind
 const spa = await get(`${base}/sessions`);
 check('SPA 路由回退', spa.ok && (await spa.text()).includes('<div id="root"'), `${spa.status}`);
 
-// 走一次 OpenAI 兼容接口。示例项目的 defaultBehavior 是 manual，不匹配规则的请求会挂起
-// 等人工处理，所以这里发的内容要命中种子规则「订单查询 → Tool Call」。
-const chat = await fetch(`${base}/v1/chat/completions`, {
+// 走一次 OpenAI 兼容接口。会话必须显式绑定规则才会参与规则匹配，所以先把示例
+// 项目的启用规则都绑到会话上，再发一条能命中「订单查询 → Tool Call」的消息。
+const projectRules = (await (await get(`${base}/api/projects/${seededProjectId}/rules`)).json()).items.filter(
+  (rule) => rule.enabled,
+);
+const session = await (
+  await fetch(`${base}/api/projects/${seededProjectId}/sessions`, {
+    method: 'POST',
+    headers: { 'content-type': 'application/json' },
+    body: JSON.stringify({ name: 'smoke', externalId: 'smoke', ruleIds: projectRules.map((rule) => rule.id) }),
+    signal: AbortSignal.timeout(15_000),
+  })
+).json();
+const chat = await fetch(`${base}/${session.externalId}/v1/chat/completions`, {
   method: 'POST',
   headers: { 'content-type': 'application/json', authorization: 'Bearer sk-mock-demo' },
   body: JSON.stringify({ model: 'gpt-4o-mini', messages: [{ role: 'user', content: '查询订单' }] }),

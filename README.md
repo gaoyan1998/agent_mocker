@@ -83,7 +83,7 @@ SQLite 数据保存在 Docker 卷 `agent-mocker-data` 中，删除或重建容�
 
 #### 环境要求
 
-- Node.js `>= 22`
+- Node.js `>= 24`
 - pnpm `>= 10`
 
 #### 安装与启动

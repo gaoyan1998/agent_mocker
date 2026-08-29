@@ -18,11 +18,7 @@
     "dist:mac": "node scripts/build.mjs && electron-builder --mac",
     "dist:win": "node scripts/build.mjs && electron-builder --win"
   },
-  "dependencies": {
-    "better-sqlite3": "^13.0.3"
-  },
   "devDependencies": {
-    "@types/better-sqlite3": "^9.6.0",
     "@types/node": "^26.2.0",
     "electron": "^44.0.0",
     "electron-builder": "^26.15.3",
