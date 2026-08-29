@@ -1,0 +1,13 @@
+node_modules/
+dist/
+data/*.db
+data/*.db-shm
+data/*.db-wal
+*.log
+.DS_Store
+.env
+.env.local
+.idea
+.agents
+.claude
+AGENTS.md

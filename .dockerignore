@@ -1,0 +1,14 @@
+node_modules
+**/node_modules
+apps/web/dist
+data/*.db
+data/*.db-shm
+data/*.db-wal
+.git
+.idea
+.claude
+.codex
+.agents
+*.log
+.env
+.env.local

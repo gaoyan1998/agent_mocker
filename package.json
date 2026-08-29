@@ -1,0 +1,25 @@
+{
+  "name": "agent-mock",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "AI Agent Mock Server - a controllable AI runtime simulator for Agent development",
+  "license": "Apache-2.0",
+  "packageManager": "pnpm@10.28.0",
+  "engines": {
+    "node": ">=22"
+  },
+  "scripts": {
+    "dev": "concurrently -n server,web -c cyan,magenta \"pnpm --filter @agent-mock/server dev\" \"pnpm --filter @agent-mock/web dev\"",
+    "dev:server": "pnpm --filter @agent-mock/server dev",
+    "dev:web": "pnpm --filter @agent-mock/web dev",
+    "build": "pnpm --filter @agent-mock/web build",
+    "docker:build": "sh deploy/build.sh",
+    "start": "pnpm --filter @agent-mock/server start",
+    "typecheck": "pnpm --recursive --parallel typecheck"
+  },
+  "devDependencies": {
+    "concurrently": "^10.0.5",
+    "typescript": "^5.9.3"
+  }
+}

@@ -1,0 +1,35 @@
+{
+  "name": "@agent-mock/web",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "tsc -p tsconfig.json --noEmit && vite build",
+    "preview": "vite preview",
+    "typecheck": "tsc -p tsconfig.json --noEmit"
+  },
+  "dependencies": {
+    "@agent-mock/shared": "workspace:*",
+    "@ant-design/icons": "^6.3.2",
+    "@monaco-editor/react": "^4.7.0",
+    "antd": "^6.6.1",
+    "axios": "^1.19.0",
+    "dayjs": "^1.11.23",
+    "lucide": "^1.33.0",
+    "monaco-editor": "^0.56.0",
+    "react": "^19.2.8",
+    "react-dom": "^19.2.8",
+    "react-markdown": "^10.1.0",
+    "react-router-dom": "^7.18.2",
+    "remark-breaks": "^4.0.0",
+    "zustand": "^5.0.15"
+  },
+  "devDependencies": {
+    "@types/react": "^19.2.7",
+    "@types/react-dom": "^19.2.5",
+    "@vitejs/plugin-react": "^6.1.0",
+    "typescript": "^5.9.3",
+    "vite": "^8.2.2"
+  }
+}
