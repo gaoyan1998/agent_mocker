@@ -102,7 +102,7 @@ client = OpenAI(
 
 response = client.chat.completions.create(
     model="gpt-4o",
-    messages=[{"role": "user", "content": "帮我查询订单 123456"}],
+    messages=[{"role": "user", "content": "帮我查询订单"}],
 )
 
 print(response.choices[0].message)
