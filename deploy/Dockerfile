@@ -18,7 +18,7 @@ RUN pnpm install --frozen-lockfile
 COPY apps apps
 COPY packages packages
 COPY examples examples
-COPY design.md README.md ./
+COPY README.md ./
 
 # The server serves apps/web/dist in production.
 RUN pnpm build
