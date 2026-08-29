@@ -1,15 +1,16 @@
 import fs from 'node:fs';
 import net from 'node:net';
-import type { FastifyInstance } from 'fastify';
-import type { CreatedServer } from '../server/entry.js';
+// 不直接 `import type { FastifyInstance } from 'fastify'`：desktop/ 有自己独立的
+// node_modules，解析不到 fastify（见 ../server/entry.ts 的说明）。
+import type { CreatedServer, ServerApp } from '../server/entry.js';
 import { log } from './logger.js';
 import { databasePath, dataDir, serverBundlePath, webDistDir } from './paths.js';
 import { loadSettings } from './settings.js';
 
 interface ServerModule {
   createServer(): Promise<CreatedServer>;
-  stopServer(app: FastifyInstance | null): Promise<void>;
-  shutdownServer(app: FastifyInstance | null): Promise<void>;
+  stopServer(app: ServerApp | null): Promise<void>;
+  shutdownServer(app: ServerApp | null): Promise<void>;
 }
 
 export interface ServerInfo {
@@ -22,7 +23,7 @@ export interface ServerInfo {
 }
 
 let serverModule: ServerModule | null = null;
-let instance: FastifyInstance | null = null;
+let instance: ServerApp | null = null;
 let current: ServerInfo | null = null;
 
 export function serverInfo(): ServerInfo | null {

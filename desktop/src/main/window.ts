@@ -23,8 +23,6 @@ export function createWindow(): BrowserWindow {
     minHeight: 640,
     show: false,
     backgroundColor: '#0f1115',
-    // 菜单里有「复制 Mock API 地址」「重启服务」等常用操作，Windows / Linux 下保持常驻可见。
-    autoHideMenuBar: false,
     webPreferences: {
       preload: preloadPath(),
       contextIsolation: true,
@@ -33,6 +31,11 @@ export function createWindow(): BrowserWindow {
       spellcheck: false,
     },
   });
+
+  // Windows / Linux 不显示窗口菜单栏；buildMenu 设置的应用菜单仅用来注册
+  // 快捷键（复制 Mock API 地址、重启服务等），removeMenu 后依然生效。
+  // macOS 的菜单在系统顶栏，此调用对它无效。
+  win.removeMenu();
 
   if (bounds.maximized) win.maximize();
   win.once('ready-to-show', () => win?.show());

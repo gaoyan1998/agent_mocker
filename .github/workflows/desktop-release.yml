@@ -61,7 +61,7 @@ jobs:
           cache: pnpm
           cache-dependency-path: pnpm-lock.yaml
 
-      # AppImage / deb 打包依赖 bsdtar，ubuntu runner 默认没装。
+      # AppImage 打包依赖 bsdtar，ubuntu runner 默认没装。
       - name: Install Linux packaging tools
         if: startsWith(matrix.os, 'ubuntu')
         run: sudo apt-get update && sudo apt-get install --no-install-recommends -y libarchive-tools
@@ -115,8 +115,6 @@ jobs:
           retention-days: 14
           path: |
             desktop/release/*.AppImage
-            desktop/release/*.deb
-            desktop/release/*.tar.gz
             desktop/release/*.exe
             desktop/release/*.zip
             desktop/release/*.dmg
@@ -169,7 +167,7 @@ jobs:
           | --- | --- | --- |
           | Windows | `.exe`（安装版）或 `.zip`（免安装） | `x64` / `arm64` |
           | macOS | `.dmg` | Apple Silicon 选 `arm64`，Intel 选 `x64` |
-          | Linux | `.AppImage`（免安装）、`.deb` 或 `.tar.gz` | `x64` / `arm64` |
+          | Linux | `.AppImage`（免安装） | `x64` / `arm64` |
 
           ### 首次启动
 

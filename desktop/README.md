@@ -108,7 +108,7 @@ node scripts/build.mjs --skip-web
 ## 本地打包
 
 ```bash
-pnpm dist:linux    # AppImage + deb + tar.gz
+pnpm dist:linux    # AppImage
 pnpm dist:win      # NSIS 安装包 + zip
 pnpm dist:mac      # dmg + zip
 pnpm pack          # 只解包成目录，用来快速验证打包结果
@@ -134,7 +134,7 @@ Actions → *Build and release desktop app* → *Run workflow*，可填：
 
 | Runner | 产物 |
 | --- | --- |
-| `ubuntu-22.04` | AppImage / deb / tar.gz |
+| `ubuntu-22.04` | AppImage |
 | `windows-latest` | NSIS 安装包 / zip |
 | `macos-latest` | dmg / zip |
 
