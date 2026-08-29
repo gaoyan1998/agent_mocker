@@ -1,0 +1,10 @@
+# desktop/ 刻意不加入根 pnpm-workspace.yaml 的 packages 里：
+# Electron 加上 electron-builder 有几百 MB 的下载量，不该拖慢只做 server / web 的同学的
+# `pnpm install`。这个文件把 desktop/ 变成一个独立的 pnpm 根目录，
+# 让 pnpm 在向上查找工作区时停在这里，从而可以在本目录单独执行 `pnpm install`。
+packages: []
+
+# 这些包需要执行安装脚本（下载二进制）。
+onlyBuiltDependencies:
+  - electron
+  - esbuild

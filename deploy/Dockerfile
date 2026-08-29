@@ -1,12 +1,11 @@
 # syntax=docker/dockerfile:1
 
-FROM node:22-bookworm-slim AS build
+FROM node:24-bookworm-slim AS build
 
 WORKDIR /app
 
 # pnpm 10 is declared by the workspace packageManager field.
 RUN corepack enable
-RUN apt-get update && apt-get install -y python3 make g++ && rm -rf /var/lib/apt/lists/*
 
 COPY package.json pnpm-lock.yaml pnpm-workspace.yaml tsconfig.base.json ./
 COPY apps/server/package.json apps/server/package.json
@@ -23,7 +22,7 @@ COPY README.md ./
 # The server serves apps/web/dist in production.
 RUN pnpm build
 
-FROM node:22-bookworm-slim AS runtime
+FROM node:24-bookworm-slim AS runtime
 
 ENV NODE_ENV=production \
     MOCK_HOST=0.0.0.0 \

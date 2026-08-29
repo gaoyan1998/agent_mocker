@@ -47,6 +47,20 @@
 
 ## 快速开始
 
+### 使用桌面版
+
+不想装 Node、也不想开终端时，直接下载桌面版：[Releases](../../releases) 里选 `desktop-v*` 的安装包，按 `agent-mocker-<版本>-<平台>-<架构>.<格式>` 命名。
+
+| 系统 | 格式 | 架构 |
+| --- | --- | --- |
+| Windows | `.exe`（安装版）或 `.zip`（免安装） | `x64` / `arm64` |
+| macOS | `.dmg` | Apple Silicon 选 `arm64`，Intel 选 `x64` |
+| Linux | `.AppImage`（免安装）、`.deb` 或 `.tar.gz` | `x64` / `arm64` |
+
+安装包未做代码签名，macOS 首次打开需右键选「打开」，Windows 在 SmartScreen 提示时选「更多信息 → 仍要运行」。
+
+Mock 服务内置在应用里，启动后默认监听 <http://127.0.0.1:3000>，把 Agent 的 `base_url` 指过去即可。端口被占用会自动顺延，实际地址显示在窗口标题栏。源码和构建说明见 [`desktop/`](desktop/)。
+
 ### 使用 Docker 快速启动
 
 ```bash
@@ -69,7 +83,7 @@ SQLite 数据保存在 Docker 卷 `agent-mocker-data` 中，删除或重建容�
 
 #### 环境要求
 
-- Node.js `>= 22`
+- Node.js `>= 24`
 - pnpm `>= 10`
 
 #### 安装与启动

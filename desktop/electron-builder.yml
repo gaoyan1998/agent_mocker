@@ -1,0 +1,66 @@
+appId: com.agentmocker.app
+productName: Agent Mocker
+copyright: Copyright © 2026 Agent Mocker Contributors
+
+directories:
+  output: release
+  buildResources: build
+
+# dist/ 里已经是 esbuild 打好的产物；SQLite 用 Node 24 内置的 node:sqlite，
+# 整个应用没有任何生产依赖，也不存在需要重编的原生模块。
+files:
+  - dist/**/*
+  - package.json
+
+# 被 @fastify/static 读取的静态目录不能待在 asar 里：
+# @fastify/static 会对 root 做 realpath 校验。
+asarUnpack:
+  - dist/web/**/*
+
+artifactName: agent-mocker-${version}-${os}-${arch}.${ext}
+
+linux:
+  category: Development
+  synopsis: Controllable AI runtime mock server for Agent development
+  # 不显式指定的话会取 package.json 的 name，生成 "@agent-mockdesktop" 这种可执行文件名。
+  executableName: agent-mocker
+  desktop:
+    entry:
+      Name: Agent Mocker
+      Comment: 可控的 AI Runtime Mock Server
+      Categories: Development;Utility;
+  target:
+    - target: AppImage
+      arch: [x64, arm64]
+
+win:
+  target:
+    - target: nsis
+      arch: [x64, arm64]
+    - target: zip
+      arch: [x64]
+
+nsis:
+  oneClick: false
+  perMachine: false
+  allowToChangeInstallationDirectory: true
+  createDesktopShortcut: true
+  createStartMenuShortcut: true
+  shortcutName: Agent Mocker
+
+mac:
+  category: public.app-category.developer-tools
+  hardenedRuntime: true
+  gatekeeperAssess: false
+  entitlements: build/entitlements.mac.plist
+  entitlementsInherit: build/entitlements.mac.plist
+  # 没有 Apple 开发者证书时保持 ad-hoc 签名，产物仍可运行（首次打开需右键“打开”）。
+  identity: null
+  target:
+    - target: dmg
+      arch: [x64, arm64]
+    - target: zip
+      arch: [x64, arm64]
+
+dmg:
+  title: Agent Mocker ${version}
