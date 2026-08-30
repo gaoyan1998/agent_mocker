@@ -24,5 +24,9 @@
     "electron-builder": "^26.15.3",
     "esbuild": "^0.28.2",
     "typescript": "^5.9.3"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/gaoyan1998/agent_mocker.git"
   }
 }
