@@ -8,6 +8,7 @@ import { registerManagementApi } from './api/index.js';
 import { config } from './config.js';
 import { HttpError } from './lib/errors.js';
 import { registerMockApi } from './mock/index.js';
+import { registerOpenApi } from './openapi.js';
 
 /**
  * 只打印 Agent 打过来的 /v1 请求；Web UI 的轮询与 SSE 不记日志，
@@ -39,6 +40,8 @@ export async function buildApp(): Promise<FastifyInstance> {
   });
 
   await app.register(cors, { origin: true, exposedHeaders: ['*'] });
+
+  await registerOpenApi(app);
 
   app.setErrorHandler((error, request, reply) => {
     if (error instanceof HttpError) {
