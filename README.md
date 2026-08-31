@@ -146,8 +146,6 @@ node examples/smoke.mjs
 http://localhost:3000/<session-id>/v1
 ```
 
-或者使用请求头 `X-Mock-Session-ID`。Replay 生成的专用 Session ID 也通过同样方式接入。
-
 ## 核心概念
 
 ```text
