@@ -26,6 +26,7 @@ export interface WorkbenchState {
   newSession: (name?: string) => Promise<DebugSession>;
   endSession: (sessionId: string) => Promise<void>;
   reopenSession: (sessionId: string) => Promise<void>;
+  renameSession: (sessionId: string, name: string) => Promise<void>;
   deleteSession: (sessionId: string) => Promise<void>;
   replaySession: (sessionId: string) => Promise<DebugSession>;
   resetSession: (sessionId: string) => Promise<void>;

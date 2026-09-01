@@ -27,6 +27,7 @@ interface Props {
     onDelete: (id: string) => void;
     onReplay: (id: string) => void;
     onReset: (id: string) => void;
+    onRename: (id: string, name: string) => Promise<void>;
     onSelect: (interactionId: string | null, eventId?: string | null) => void;
     onApplied: () => void;
     onSessionUpdated: (session: DebugSession) => void;
@@ -48,6 +49,7 @@ export function WorkbenchLayout({
                                     onDelete,
                                     onReplay,
                                     onReset,
+                                    onRename,
                                     onSelect,
                                     onApplied,
                                     onSessionUpdated,
@@ -80,6 +82,7 @@ export function WorkbenchLayout({
                                             onDelete={onDelete}
                                             onReplay={onReplay}
                                             onReset={onReset}
+                                            onRename={onRename}
                                         />
                                     </div>
                                 </Splitter.Panel>

@@ -199,6 +199,7 @@ export function WorkbenchPage() {
                         t('workbench.replayReset'),
                     )
                 }
+                onRename={(id, name) => store.renameSession(id, name)}
                 onSelect={store.select}
                 onApplied={() => void store.refreshInteractions()}
                 onSessionUpdated={(updated) => store.setSession(updated)}

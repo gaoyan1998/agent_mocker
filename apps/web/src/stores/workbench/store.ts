@@ -98,6 +98,11 @@ export const useWorkbenchStore = create<WorkbenchState>((set, get) => ({
     set((state) => ({ sessions: sortSessions(replaceSession(state.sessions, session)) }));
   },
 
+  renameSession: async (sessionId, name) => {
+    const session = await sessionApi.update(sessionId, { name });
+    set((state) => ({ sessions: replaceSession(state.sessions, session) }));
+  },
+
   deleteSession: async (sessionId) => {
     await sessionApi.remove(sessionId);
     const remaining = get().sessions.filter((item) => item.id !== sessionId);
